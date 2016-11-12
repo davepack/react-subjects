@@ -11,17 +11,43 @@ const { func, any } = PropTypes
 // Make this work like a normal <select><option/></select>
 
 class Select extends React.Component {
+  static childContextTypes = {
+    onSelect: func.isRequired,
+  }
+
   static propTypes = {
     onChange: func,
     value: any,
     defaultValue: any
   }
 
+  state = {
+    isOpen: false,
+  }
+
+  getChildContext = () => {
+    return {
+      onSelect: this.onSelect,
+    }
+  }
+
+  onSelect = (value) => {
+    console.log(value)
+    this.setState({value})
+  }
+
   render() {
+    let label
+    React.Children.forEach(this.props.children, (child) => {
+      if (child.props.value === this.state.value) {
+        label = child.props.children
+      }
+    })
+
     return (
-      <div className="select">
-        <div className="label">label <span className="arrow">▾</span></div>
-        <div className="options">
+      <div className="select" onClick={() => this.setState({isOpen: !this.state.isOpen})}>
+        <div className="label">{label} <span className="arrow">▾</span></div>
+        <div className="options" style={{display: this.state.isOpen ? 'block' : 'none'}}>
           {this.props.children}
         </div>
       </div>
@@ -31,9 +57,12 @@ class Select extends React.Component {
 
 
 class Option extends React.Component {
+  static contextTypes = {
+    onSelect: func.isRequired,
+  }
   render() {
     return (
-      <div className="option">{this.props.children}</div>
+      <div className="option" onClick={() => this.context.onSelect(this.props.value)}>{this.props.children}</div>
     )
   }
 }
@@ -43,7 +72,7 @@ class App extends React.Component {
     selectValue: 'dosa'
   }
 
-  setToMintChutney() {
+  setToMintChutney = () => {
    this.setState({selectValue: 'mint-chutney'})
   }
 

@@ -21,6 +21,39 @@ import LoadingDots from './utils/LoadingDots'
 import getAddressFromCoords from './utils/getAddressFromCoords'
 
 class App extends React.Component {
+  render() {
+    return (
+      <div>
+        <h1>Geolocation</h1>
+        <GeoPosition>
+          {({coords, error}) => (
+            error ? (
+              <div>{error.message}</div>
+            ) : (
+              <div>
+                <dl>
+                  <dt>Latitude</dt>
+                  <dd>{coords.latitude || <LoadingDots/>}</dd>
+                  <dt>Longitude</dt>
+                  <dd>{coords.longitude || <LoadingDots/>}</dd>
+                </dl>
+                {coords.latitude && (
+                  <GeoAddress {...coords}>
+                    {(address) => (
+                      <div>{address}</div>
+                    )}
+                  </GeoAddress>
+                )}
+              </div>
+            )
+          )}
+        </GeoPosition>
+      </div>
+    )
+  }
+}
+
+class GeoPosition extends React.Component {
   state = {
     coords: {
       latitude: null,
@@ -49,21 +82,33 @@ class App extends React.Component {
   }
 
   render() {
-    return (
-      <div>
-        <h1>Geolocation</h1>
-        {this.state.error ? (
-          <div>{this.state.error.message}</div>
-        ) : (
-          <dl>
-            <dt>Latitude</dt>
-            <dd>{this.state.coords.latitude || <LoadingDots/>}</dd>
-            <dt>Longitude</dt>
-            <dd>{this.state.coords.longitude || <LoadingDots/>}</dd>
-          </dl>
-        )}
-      </div>
-    )
+    console.log(this.state)
+    return this.props.children(this.state)
+  }
+}
+
+class GeoAddress extends React.Component {
+  state = {
+    address: null
+  }
+
+  componentDidMount = () => {
+    const { latitude, longitude } = this.props;
+    if (latitude && longitude) {
+      this.getAddress(latitude, longitude)
+    }
+  }
+
+  getAddress = (latitude, longitude) => {
+    console.log(latitude, longitude)
+    const address = getAddressFromCoords(latitude, longitude).then(address => {
+      console.log(address)
+      this.setState({address})
+    })
+  }
+
+  render() {
+    return this.props.children(this.state.address)
   }
 }
 

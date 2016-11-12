@@ -23,31 +23,66 @@ class RainbowList extends React.Component {
     renderRowAtIndex: PropTypes.func.isRequired
   }
 
+  state = {
+    scrollTop: 0,
+    viewHeight: window.innerHeight,
+  }
+
+  componentDidMount = () => {
+    window.addEventListener('resize', this.onWindowResize)
+  }
+
+  componentWillUnmount = () => {
+    window.removeEventListener('resize', this.onWindowResize)
+  }
+
+  onWindowResize = (e) => {
+    const { clientHeight } = e.target
+    this.setState({ clientHeight })
+  }
+
+  onScroll = (e) => {
+    const { scrollTop, clientHeight: viewHeight } = e.target
+    console.log(viewHeight)
+    this.setState({scrollTop, viewHeight})
+    // console.log(e.target.scrollTop)
+  }
+
   render() {
     const { numRows, rowHeight, renderRowAtIndex } = this.props
     const totalHeight = numRows * rowHeight
 
     const items = []
 
-    let index = 0
-    while (index < numRows) {
+    const { viewHeight, scrollTop } = this.state
+    const scrollBottom = scrollTop + viewHeight
+
+    const startIndex = Math.max(0, Math.floor(scrollTop / rowHeight) - 20)
+    const endIndex = Math.min(numRows, Math.ceil(scrollBottom / rowHeight) + 20)
+
+
+    let index = startIndex
+    while (index < endIndex) {
       items.push(<li key={index}>{renderRowAtIndex(index)}</li>)
       index++
     }
 
     return (
-      <div style={{ height: '100%', overflowY: 'scroll' }}>
-        <ol style={{ height: totalHeight }}>
-          {items}
-        </ol>
-      </div>
+        <div onScroll={this.onScroll}
+          style={{ height: '100%', overflow: 'scrollY' }}
+          >
+          <ol
+            style={{ height: totalHeight, paddingTop: this.state.scrollTop }}>
+            {items}
+          </ol>
+        </div>
     )
   }
 }
 
 render(
   <RainbowList
-    numRows={500}
+    numRows={5000}
     rowHeight={RainbowListDelegate.rowHeight}
     renderRowAtIndex={RainbowListDelegate.renderRowAtIndex}
   />,

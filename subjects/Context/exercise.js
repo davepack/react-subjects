@@ -21,24 +21,79 @@ import React from 'react'
 import { render } from 'react-dom'
 
 class Form extends React.Component {
+  static childContextTypes = {
+    onSubmit: React.PropTypes.func.isRequired,
+    setFieldValue: React.PropTypes.func.isRequired,
+  }
+
+  getChildContext = () => {
+    return {
+      onSubmit: this.props.onSubmit,
+      setFieldValue: this.setFieldValue,
+    }
+  }
+
+  setFieldValue = (name, value) => {
+    // console.log(name, value)
+    const inputValues = this.state.inputValues.set(name, value)
+    this.setState({inputValues})
+  }
+
+  state = {inputValues: new Map()}
+
   render() {
-    return <div>{this.props.children}</div>
+    const renderFieldValues = [];
+    this.state.inputValues.forEach((val, key) => {
+      renderFieldValues.push(<div key={key}>{key}: {val}</div>)
+    })
+
+    return (
+      <div>
+        {renderFieldValues}
+        {this.props.children}
+      </div>
+    )
   }
 }
 
 class SubmitButton extends React.Component {
+  static contextTypes = {
+    onSubmit: React.PropTypes.func.isRequired,
+  }
+
   render() {
-    return <button>{this.props.children}</button>
+    return <button onClick={this.context.onSubmit}>{this.props.children}</button>
   }
 }
 
 class TextInput extends React.Component {
+  static contextTypes = {
+    onSubmit: React.PropTypes.func.isRequired,
+    setFieldValue: React.PropTypes.func.isRequired,
+  }
+
+  state = {
+    value: "",
+  }
+
+  onKeyUp = (e) => {
+    const { keyCode } = e
+    // console.log(keyCode)
+    if (keyCode === 13) {
+      this.context.onSubmit()
+    } else if (keyCode > 31) {
+      this.context.setFieldValue(this.props.name, this.field.value)
+    }
+  }
+
   render() {
     return (
       <input
+        ref={(c) => this.field = c}
         type="text"
         name={this.props.name}
         placeholder={this.props.placeholder}
+        onKeyUp={this.onKeyUp}
       />
     )
   }

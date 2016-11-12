@@ -1,18 +1,12 @@
 import React, { PropTypes } from 'react'
 import CreateContactForm from './CreateContactForm'
+import connect from '../mini-redux/connect'
 
 const App = React.createClass({
-
-  getInitialState() {
-    return {
-      contacts: [ { id: 'ryan', first: 'Ryan', last: 'Florence', avatar: 'http://ryanflorence.com/jsconf-avatars/avatars/ryan.jpg' } ]
-    }
-  },
-
-
   handleCreateContact(contact) {
-    this.setState({
-      contacts: this.state.contacts.concat([ contact ])
+    this.props.dispatch({
+      type: 'CREATE_CONTACT',
+      contact,
     })
   },
 
@@ -20,9 +14,8 @@ const App = React.createClass({
     return (
       <div>
         <h1>Contacts!</h1>
-
         <ul style={{ listStyleType: 'none', padding: 0 }}>
-          {this.state.contacts.map((contact) => (
+          {this.props.contacts.map((contact) => (
             <li key={contact.id}>
               <img src={contact.avatar} height="50"/>{' '}
               {contact.first} {contact.last}
@@ -36,5 +29,10 @@ const App = React.createClass({
   }
 })
 
-export default App
+const mapStateToProps = (state) => {
+  return {
+    contacts: state.contacts,
+  }
+}
 
+export default connect(mapStateToProps)(App)

@@ -12,12 +12,26 @@ import 'bootstrap-webpack'
 class Modal extends React.Component {
   static propTypes = {
     title: PropTypes.string.isRequired,
-    children: PropTypes.node
+    children: PropTypes.node,
+    isOpen: PropTypes.bool
+  }
+
+  componentDidMount = () => {
+    this.doModal()
+  }
+
+  componentDidUpdate = () => {
+    this.doModal()
+  }
+
+  doModal = () => {
+    const what = this.props.isOpen ? 'show' : 'hide'
+    $(findDOMNode(this.refs.modal)).modal(what)
   }
 
   render() {
     return (
-      <div className="modal fade">
+      <div ref="modal" className="modal fade">
         <div className="modal-dialog">
           <div className="modal-content">
             <div className="modal-header">
@@ -34,12 +48,16 @@ class Modal extends React.Component {
 }
 
 class App extends React.Component {
+  state = {
+    modalOpen: false,
+  }
+
   openModal = () => {
-    $(findDOMNode(this.refs.modal)).modal('show')
+    this.setState({modalOpen: true})
   }
 
   closeModal = () => {
-    $(findDOMNode(this.refs.modal)).modal('hide')
+    this.setState({modalOpen: false})
   }
 
   render() {
@@ -52,7 +70,7 @@ class App extends React.Component {
           onClick={this.openModal}
         >open modal</button>
 
-        <Modal ref="modal" title="Declarative is better">
+        <Modal title="Declarative is better" isOpen={this.state.modalOpen}>
           <p>Calling methods on instances is a FLOW not a STOCK!</p>
           <p>It’s the dynamic process, not the static program in text space.</p>
           <p>You have to experience it over time, rather than in snapshots of state.</p>
