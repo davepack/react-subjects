@@ -23,15 +23,15 @@ Think about html forms when thinking about components
 ## Context
 4 types of state:
 1. shared app state
-2.  prop state passed to children components
-2.  component internal state
-3.  state that needs to be shared in compound components
+2. prop state passed to children components
+2. component internal state
+3. state that needs to be shared in compound components
 
 Use context as shared internal state for compound components.
 
 Limit your use of context to small, self-contained pieces. Compound components are a decent use case.
 
-Biggest problem: shouldComponentUpdate
+Biggest problem: shouldComponentUpdate doesn't allow a check of context, a nested component using shouldComponentUpdate can screw up updates down the tree.
 
 (OBSERVATION: this.setState callback: had no idea it existed. Is it better than await?)
 
